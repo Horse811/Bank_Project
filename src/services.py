@@ -38,25 +38,37 @@ def search_by_target(transactions: list, input_target: str) -> str:
         return json.dumps({"Результаты поиска": "Ничего не нашлось"}, ensure_ascii=False)
 
 
-def search_by_phones(transactions: list) -> str:
+def search_by_phones(transactions: Optional[list] = None) -> str:
     """Функция возвращает JSON со всеми транзакциями,
     содержащими в описании мобильные номера"""
     services_logger.info("получение списка транзакций")
-    if not transactions:
-        transactions = make_transactions()
+
+    # Обработка случая, когда transactions=None
+    if transactions is None:
+        transactions = make_transactions() or []  # Если make_transactions() вернёт None, используем пустой список
+
     phones_transactions = []
+    phone_pattern = r"(?:^|\s)(?:\+7|8)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}(?:$|\s)"
+
     for transaction in transactions:
-        if re.search(
-            r"(?:^|\s)(?:\+7|8)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}(?:$|\s)",
-            transaction.get("Описание", ""),
-        ):
+        description = transaction.get("Описание", "")
+        if re.search(phone_pattern, str(description)):
             phones_transactions.append(transaction)
+
     services_logger.info("формирование ответа")
-    if len(phones_transactions) != 0:
+    if phones_transactions:
         services_logger.info("поиск произведен успешно")
         return json.dumps(phones_transactions, ensure_ascii=False)
     else:
         services_logger.warning("поиск не дал результатов")
         return json.dumps({"Результаты поиска": "Ничего не нашлось"}, ensure_ascii=False)
+
+
+# Безопасный вызов
+transactions = make_transactions()
+if transactions is not None:
+    print(search_by_phones(transactions))
+else:
+    print(json.dumps({"Ошибка": "Не удалось загрузить транзакции"}, ensure_ascii=False))
 
 print(search_by_phones(make_transactions()))

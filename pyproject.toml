@@ -1,9 +1,9 @@
 [project]
-name = "bank-project"
+name = "Bank_Project"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Oksana Niklashkova",email = "o.niklashkova@gmail.com"}
+    {name = "Danil Abaskalov",email = "eto4tozapokemon1@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.13"
